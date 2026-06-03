@@ -9860,6 +9860,8 @@ var $elm_community$typed_svg$TypedSvg$Attributes$strokeWidth = function (length)
 		'stroke-width',
 		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
 };
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $elm_community$typed_svg$TypedSvg$svg = $elm_community$typed_svg$TypedSvg$Core$node('svg');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
@@ -10082,7 +10084,14 @@ var $author$project$Main$view = function (model) {
 			};
 			return A2(
 				$elm$html$Html$div,
-				_List_Nil,
+				_List_fromArray(
+					[
+						A2($elm$html$Html$Attributes$style, 'background-color', '#222'),
+						A2($elm$html$Html$Attributes$style, 'color', '#fff'),
+						A2($elm$html$Html$Attributes$style, 'padding', '20px'),
+						A2($elm$html$Html$Attributes$style, 'min-height', '100vh'),
+						A2($elm$html$Html$Attributes$style, 'font-family', 'sans-serif')
+					]),
 				_List_fromArray(
 					[
 						A2(
