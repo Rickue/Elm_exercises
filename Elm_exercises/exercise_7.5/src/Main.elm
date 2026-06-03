@@ -6,7 +6,7 @@ import Csv
 import Csv.Decode
 import Date exposing (Date)
 import Dict exposing (Dict)
-import Html exposing (Html, text)
+import Html exposing (Html, div, pre, text)
 import Http
 import RecursivePattern exposing (Level(..), PixelPositon(..), RecordedData(..), augementLevel, createPixelMap, startPosition)
 import RecursivePattern.Helper exposing (drawTuplePosition)
@@ -48,7 +48,7 @@ dataUrl =
         "https://cors-anywhere.herokuapp.com/https://users.informatik.uni-halle.de/~hinnebur/Lehre/InfoVis/U06/DJ.csv"
 
     else
-        "data_csv/DJ.csv"
+        "../data_csv/DJ.csv"
 
 
 type alias Series =
@@ -213,77 +213,104 @@ view model =
                     TypedSvg.rect
                         attributeList
                         []
+
+                entryToLine : CurrentRecordedData msg -> String
+                entryToLine (RecordedData pixelPos ( dateString, maybeValue ) _) =
+                    let
+                        posText =
+                            case pixelPos of
+                                PixelPositon x y ->
+                                    "position " ++ String.fromInt x ++ ", " ++ String.fromInt y
+
+                        valueText =
+                            case maybeValue of
+                                Just v ->
+                                    String.fromFloat v
+
+                                Nothing ->
+                                    "Nothing"
+                    in
+                    dateString ++ ", " ++ valueText ++ " to " ++ posText
             in
-            TypedSvg.svg
-                [ TypedSvg.Attributes.viewBox 0 0 500 590
-                , TypedSvg.Attributes.width (TypedSvg.Types.px 800)
-                , TypedSvg.Attributes.height (TypedSvg.Types.px 944)
-                , TypedSvg.Attributes.preserveAspectRatio
-                    (TypedSvg.Types.Align TypedSvg.Types.ScaleMin TypedSvg.Types.ScaleMin)
-                    TypedSvg.Types.Meet
-                ]
-                [ TypedSvg.text_
-                    [ TypedSvg.Attributes.x (TypedSvg.Types.px 8)
-                    , TypedSvg.Attributes.y (TypedSvg.Types.px 18)
-                    , TypedSvg.Attributes.fontSize (TypedSvg.Types.px 16)
-                    , TypedSvg.Attributes.fontWeight TypedSvg.Types.FontWeightBold
-                    , TypedSvg.Attributes.fill (TypedSvg.Types.Paint Color.black)
+            div []
+                [ TypedSvg.svg
+                    [ TypedSvg.Attributes.viewBox 0 0 500 590
+                    , TypedSvg.Attributes.width (TypedSvg.Types.px 800)
+                    , TypedSvg.Attributes.height (TypedSvg.Types.px 944)
+                    , TypedSvg.Attributes.preserveAspectRatio
+                        (TypedSvg.Types.Align TypedSvg.Types.ScaleMin TypedSvg.Types.ScaleMin)
+                        TypedSvg.Types.Meet
                     ]
-                    [ TypedSvg.Core.text
-                        ("Loaded: DJ(" ++ String.fromInt (List.length series.raw) ++ ")")
-                    ]
-                , TypedSvg.g
-                    [ TypedSvg.Attributes.transform [ TypedSvg.Types.Translate 0 76 ] ]
-                    (List.map (drawPosition >> drawStyle >> draw) ourData)
-                , TypedSvg.g
-                    [ TypedSvg.Attributes.transform [ TypedSvg.Types.Translate 0 50 ] ]
-                    [ TypedSvg.rect
+                    [ TypedSvg.text_
                         [ TypedSvg.Attributes.x (TypedSvg.Types.px 8)
-                        , TypedSvg.Attributes.y (TypedSvg.Types.px 0)
-                        , TypedSvg.Attributes.width (TypedSvg.Types.px 18)
-                        , TypedSvg.Attributes.height (TypedSvg.Types.px 6)
-                        , TypedSvg.Attributes.fill
-                            (TypedSvg.Types.Paint (Scale.Color.redYellowGreenInterpolator 1))
-                        ]
-                        []
-                    , TypedSvg.rect
-                        [ TypedSvg.Attributes.x (TypedSvg.Types.px 28)
-                        , TypedSvg.Attributes.y (TypedSvg.Types.px 0)
-                        , TypedSvg.Attributes.width (TypedSvg.Types.px 18)
-                        , TypedSvg.Attributes.height (TypedSvg.Types.px 6)
-                        , TypedSvg.Attributes.fill
-                            (TypedSvg.Types.Paint (Scale.Color.redYellowGreenInterpolator 0.5))
-                        ]
-                        []
-                    , TypedSvg.rect
-                        [ TypedSvg.Attributes.x (TypedSvg.Types.px 48)
-                        , TypedSvg.Attributes.y (TypedSvg.Types.px 0)
-                        , TypedSvg.Attributes.width (TypedSvg.Types.px 18)
-                        , TypedSvg.Attributes.height (TypedSvg.Types.px 6)
-                        , TypedSvg.Attributes.fill
-                            (TypedSvg.Types.Paint (Scale.Color.redYellowGreenInterpolator 0))
-                        ]
-                        []
-                    , TypedSvg.text_
-                        [ TypedSvg.Attributes.x (TypedSvg.Types.px 72)
-                        , TypedSvg.Attributes.y (TypedSvg.Types.px 6)
-                        , TypedSvg.Attributes.fontSize (TypedSvg.Types.px 10)
+                        , TypedSvg.Attributes.y (TypedSvg.Types.px 18)
+                        , TypedSvg.Attributes.fontSize (TypedSvg.Types.px 16)
+                        , TypedSvg.Attributes.fontWeight TypedSvg.Types.FontWeightBold
                         , TypedSvg.Attributes.fill (TypedSvg.Types.Paint Color.black)
                         ]
                         [ TypedSvg.Core.text
-                            ("Open (index value): min "
-                                ++ String.fromFloat minValue
-                                ++ "  max "
-                                ++ String.fromFloat maxValue
-                            )
+                            ("Loaded: DJ(" ++ String.fromInt (List.length series.raw) ++ ")")
                         ]
-                    , TypedSvg.text_
-                        [ TypedSvg.Attributes.x (TypedSvg.Types.px 72)
-                        , TypedSvg.Attributes.y (TypedSvg.Types.px 18)
-                        , TypedSvg.Attributes.fontSize (TypedSvg.Types.px 10)
-                        , TypedSvg.Attributes.fill (TypedSvg.Types.Paint Color.black)
+                    , TypedSvg.g
+                        [ TypedSvg.Attributes.transform [ TypedSvg.Types.Translate 0 76 ] ]
+                        (List.map (drawPosition >> drawStyle >> draw) ourData)
+                    , TypedSvg.g
+                        [ TypedSvg.Attributes.transform [ TypedSvg.Types.Translate 0 50 ] ]
+                        [ TypedSvg.rect
+                            [ TypedSvg.Attributes.x (TypedSvg.Types.px 8)
+                            , TypedSvg.Attributes.y (TypedSvg.Types.px 0)
+                            , TypedSvg.Attributes.width (TypedSvg.Types.px 18)
+                            , TypedSvg.Attributes.height (TypedSvg.Types.px 6)
+                            , TypedSvg.Attributes.fill
+                                (TypedSvg.Types.Paint (Scale.Color.redYellowGreenInterpolator 1))
+                            ]
+                            []
+                        , TypedSvg.rect
+                            [ TypedSvg.Attributes.x (TypedSvg.Types.px 28)
+                            , TypedSvg.Attributes.y (TypedSvg.Types.px 0)
+                            , TypedSvg.Attributes.width (TypedSvg.Types.px 18)
+                            , TypedSvg.Attributes.height (TypedSvg.Types.px 6)
+                            , TypedSvg.Attributes.fill
+                                (TypedSvg.Types.Paint (Scale.Color.redYellowGreenInterpolator 0.5))
+                            ]
+                            []
+                        , TypedSvg.rect
+                            [ TypedSvg.Attributes.x (TypedSvg.Types.px 48)
+                            , TypedSvg.Attributes.y (TypedSvg.Types.px 0)
+                            , TypedSvg.Attributes.width (TypedSvg.Types.px 18)
+                            , TypedSvg.Attributes.height (TypedSvg.Types.px 6)
+                            , TypedSvg.Attributes.fill
+                                (TypedSvg.Types.Paint (Scale.Color.redYellowGreenInterpolator 0))
+                            ]
+                            []
+                        , TypedSvg.text_
+                            [ TypedSvg.Attributes.x (TypedSvg.Types.px 72)
+                            , TypedSvg.Attributes.y (TypedSvg.Types.px 6)
+                            , TypedSvg.Attributes.fontSize (TypedSvg.Types.px 10)
+                            , TypedSvg.Attributes.fill (TypedSvg.Types.Paint Color.black)
+                            ]
+                            [ TypedSvg.Core.text
+                                ("Open (index value): min "
+                                    ++ String.fromFloat minValue
+                                    ++ "  max "
+                                    ++ String.fromFloat maxValue
+                                )
+                            ]
+                        , TypedSvg.text_
+                            [ TypedSvg.Attributes.x (TypedSvg.Types.px 72)
+                            , TypedSvg.Attributes.y (TypedSvg.Types.px 18)
+                            , TypedSvg.Attributes.fontSize (TypedSvg.Types.px 10)
+                            , TypedSvg.Attributes.fill (TypedSvg.Types.Paint Color.black)
+                            ]
+                            [ TypedSvg.Core.text "Grün = low, Rot = high, Grau = closed" ]
                         ]
-                        [ TypedSvg.Core.text "Grün = low, Rot = high, Grau = closed" ]
+                    ]
+                , pre []
+                    [ text
+                        (ourData
+                            |> List.map entryToLine
+                            |> String.join "\n"
+                        )
                     ]
                 ]
 

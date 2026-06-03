@@ -127,6 +127,7 @@ createPixelMap (PixelPositon x y) level =
             temp.outerResult
 
 
+
 {-| creates a list of pixel positions that correspond to the top-down arrangement
 
     createPixelMapTopDown (PixelPosition 0 0) [ ( Level 2 2, Level 1 1 ), ( Level 1 1, Level 0 0 ) ] == [ PixelPositon 0 0, PixelPositon 0 1, PixelPositon 1 0, PixelPositon 1 1 ]
@@ -165,6 +166,7 @@ createPixelMapTopDown (PixelPositon x y) level =
                             (LoopRec x y [])
             in
             temp.outerResult
+
 
 
 {-| creates a list of pixel positions that correspond to the back-and-forth arrangement

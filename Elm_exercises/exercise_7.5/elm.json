@@ -2,7 +2,7 @@
     "type": "application",
     "source-directories": [
         "src",
-        "lib/recursive-pattern/src"
+        "../lib/recursive-pattern/src"
     ],
     "elm-version": "0.19.1",
     "dependencies": {
