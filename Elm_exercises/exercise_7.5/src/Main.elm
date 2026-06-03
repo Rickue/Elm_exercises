@@ -7,6 +7,7 @@ import Csv.Decode
 import Date exposing (Date)
 import Dict exposing (Dict)
 import Html exposing (Html, div, pre, text)
+import Html.Attributes exposing (style)
 import Http
 import RecursivePattern exposing (Level(..), PixelPositon(..), RecordedData(..), augementLevel, createPixelMap, startPosition)
 import RecursivePattern.Helper exposing (drawTuplePosition)
@@ -223,7 +224,7 @@ view model =
                     in
                     dateString ++ ", " ++ valueText ++ " to " ++ posText
             in
-            div []
+            div [ style "background-color" "#222", style "color" "#fff", style "padding" "20px", style "min-height" "100vh", style "font-family" "sans-serif" ]
                 [ TypedSvg.svg
                     [ TypedSvg.Attributes.viewBox 0 0 500 590
                     , TypedSvg.Attributes.width (TypedSvg.Types.px 800)
