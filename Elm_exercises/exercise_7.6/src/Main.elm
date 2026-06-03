@@ -184,9 +184,9 @@ view model =
                         indexConfig data.activeIndex
 
                     level =
-                        [ Level 6 6   -- Außen: Jahre
-                        , Level 4 3   -- Monate pro Jahr
-                        , Level 1 5   -- Wochen pro Monat
+                        [ Level 6 6   -- Außen: Jahre (bietet Platz für 36 Jahre)
+                        , Level 4 3   -- Monate pro Jahr (4 Spalten, 3 Zeilen)
+                        , Level 1 5   -- Wochen pro Monat (maximal 5 Wochen)
                         , Level 7 1   -- Innen: 7 Wochentage nebeneinander
                         ]
 
@@ -224,7 +224,6 @@ view model =
                             value
                             (drawTuplePosition ( w, h ) level pixelPosition)
 
-                    -- 🛠️ HIER WURDEN DIE BORDERS OPTIMIERT
                     createStyle : ( String, Maybe Float ) -> List (TypedSvg.Core.Attribute Msg)
                     createStyle ( dateString, value ) =
                         let
@@ -234,7 +233,7 @@ view model =
                                         Scale.Color.viridisInterpolator (Scale.convert normalize v)
 
                                     Nothing ->
-                                        Color.rgb255 50 50 50 -- Farbe für geschlossene Tage
+                                        Color.lightGray -- Farbe für geschlossene Tage
                         in
                         [ TypedSvg.Attributes.title
                             (if String.isEmpty dateString then
@@ -246,9 +245,7 @@ view model =
                                               )
                             )
                         , TypedSvg.Attributes.fill (TypedSvg.Types.Paint colorValue)
-                        -- 1. Farbe exakt an den Hintergrund (#222 -> RGB 34 34 34) angepasst:
                         , TypedSvg.Attributes.stroke (TypedSvg.Types.Paint (Color.rgb255 34 34 34))
-                        -- 2. Auf exakt 1px erhöht, um mathematische Rundungsfehler im Browser zu eliminieren:
                         , TypedSvg.Attributes.strokeWidth (TypedSvg.Types.px 1)
                         , TypedSvg.Attributes.shapeRendering TypedSvg.Types.RenderCrispEdges
                         ]
@@ -292,7 +289,7 @@ view model =
                             [ TypedSvg.rect [ TypedSvg.Attributes.x (TypedSvg.Types.px 8), TypedSvg.Attributes.width (TypedSvg.Types.px 20), TypedSvg.Attributes.height (TypedSvg.Types.px 10), TypedSvg.Attributes.fill (TypedSvg.Types.Paint (Scale.Color.viridisInterpolator 0)) ] []
                             , TypedSvg.rect [ TypedSvg.Attributes.x (TypedSvg.Types.px 33), TypedSvg.Attributes.width (TypedSvg.Types.px 20), TypedSvg.Attributes.height (TypedSvg.Types.px 10), TypedSvg.Attributes.fill (TypedSvg.Types.Paint (Scale.Color.viridisInterpolator 0.5)) ] []
                             , TypedSvg.rect [ TypedSvg.Attributes.x (TypedSvg.Types.px 58), TypedSvg.Attributes.width (TypedSvg.Types.px 20), TypedSvg.Attributes.height (TypedSvg.Types.px 10), TypedSvg.Attributes.fill (TypedSvg.Types.Paint (Scale.Color.viridisInterpolator 1)) ] []
-                            , TypedSvg.rect [ TypedSvg.Attributes.x (TypedSvg.Types.px 83), TypedSvg.Attributes.width (TypedSvg.Types.px 20), TypedSvg.Attributes.height (TypedSvg.Types.px 10), TypedSvg.Attributes.fill (TypedSvg.Types.Paint (Color.rgb255 50 50 50)) ] []
+                            , TypedSvg.rect [ TypedSvg.Attributes.x (TypedSvg.Types.px 83), TypedSvg.Attributes.width (TypedSvg.Types.px 20), TypedSvg.Attributes.height (TypedSvg.Types.px 10), TypedSvg.Attributes.fill (TypedSvg.Types.Paint (Color.lightGray)) ] []
                             
                             , TypedSvg.text_
                                 [ TypedSvg.Attributes.x (TypedSvg.Types.px 115)

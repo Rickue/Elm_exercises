@@ -238,7 +238,7 @@ view model =
                         , TypedSvg.Attributes.y (TypedSvg.Types.px 18)
                         , TypedSvg.Attributes.fontSize (TypedSvg.Types.px 16)
                         , TypedSvg.Attributes.fontWeight TypedSvg.Types.FontWeightBold
-                        , TypedSvg.Attributes.fill (TypedSvg.Types.Paint Color.black)
+                        , TypedSvg.Attributes.fill (TypedSvg.Types.Paint Color.white)
                         ]
                         [ TypedSvg.Core.text
                             ("Loaded: DJ(" ++ String.fromInt (List.length series.raw) ++ ")")
@@ -279,7 +279,7 @@ view model =
                             [ TypedSvg.Attributes.x (TypedSvg.Types.px 72)
                             , TypedSvg.Attributes.y (TypedSvg.Types.px 6)
                             , TypedSvg.Attributes.fontSize (TypedSvg.Types.px 10)
-                            , TypedSvg.Attributes.fill (TypedSvg.Types.Paint Color.black)
+                            , TypedSvg.Attributes.fill (TypedSvg.Types.Paint Color.white)
                             ]
                             [ TypedSvg.Core.text
                                 ("Open (index value): min "
@@ -292,7 +292,7 @@ view model =
                             [ TypedSvg.Attributes.x (TypedSvg.Types.px 72)
                             , TypedSvg.Attributes.y (TypedSvg.Types.px 18)
                             , TypedSvg.Attributes.fontSize (TypedSvg.Types.px 10)
-                            , TypedSvg.Attributes.fill (TypedSvg.Types.Paint Color.black)
+                            , TypedSvg.Attributes.fill (TypedSvg.Types.Paint Color.white)
                             ]
                             [ TypedSvg.Core.text "Grün = low, Rot = high, Grau = closed" ]
                         ]
