@@ -3,8 +3,8 @@ module Main exposing (Model(..), Msg(..), init, main, subscriptions, update, vie
 import Browser
 import Color
 import Csv
-import Csv.Decode
 import Time
+import Csv.Decode
 import Date exposing (Date)
 import Dict exposing (Dict)
 import Html exposing (Html, button, div, text)
@@ -188,11 +188,11 @@ view model =
                         [ Level 6 6   -- Außen: Jahre (bietet Platz für 36 Jahre)
                         , Level 4 3   -- Monate pro Jahr (4 Spalten, 3 Zeilen)
                         , Level 1 5   -- Wochen pro Monat (maximal 5 Wochen)
-                        , Level 7 1   -- Innen: 7 Wochentage nebeneinander
+                        , Level 5 1   -- Innen: 5 Wochentage nebeneinander
                         ]
 
                     ( w, h ) =
-                        ( 840, 450 )
+                        ( 840, 630 )
 
                     currentValues : List Float
                     currentValues =
@@ -268,9 +268,9 @@ view model =
                     [ renderButtons data.activeIndex
                     
                     , TypedSvg.svg
-                        [ TypedSvg.Attributes.viewBox 0 0 840 550
+                        [ TypedSvg.Attributes.viewBox 0 0 840 770
                         , TypedSvg.Attributes.width (TypedSvg.Types.px 1000)
-                        , TypedSvg.Attributes.height (TypedSvg.Types.px 650)
+                        , TypedSvg.Attributes.height (TypedSvg.Types.px 825)
                         ]
                         [ TypedSvg.text_
                             [ TypedSvg.Attributes.x (TypedSvg.Types.px 8)
@@ -286,7 +286,7 @@ view model =
                             (List.map (drawPosition >> drawStyle >> draw) ourData)
                         
                         , TypedSvg.g
-                            [ TypedSvg.Attributes.transform [ TypedSvg.Types.Translate 0 510 ] ]
+                            [ TypedSvg.Attributes.transform [ TypedSvg.Types.Translate 0 730 ] ]
                             [ TypedSvg.rect [ TypedSvg.Attributes.x (TypedSvg.Types.px 8), TypedSvg.Attributes.width (TypedSvg.Types.px 20), TypedSvg.Attributes.height (TypedSvg.Types.px 10), TypedSvg.Attributes.fill (TypedSvg.Types.Paint (Scale.Color.viridisInterpolator 0)) ] []
                             , TypedSvg.rect [ TypedSvg.Attributes.x (TypedSvg.Types.px 33), TypedSvg.Attributes.width (TypedSvg.Types.px 20), TypedSvg.Attributes.height (TypedSvg.Types.px 10), TypedSvg.Attributes.fill (TypedSvg.Types.Paint (Scale.Color.viridisInterpolator 0.5)) ] []
                             , TypedSvg.rect [ TypedSvg.Attributes.x (TypedSvg.Types.px 58), TypedSvg.Attributes.width (TypedSvg.Types.px 20), TypedSvg.Attributes.height (TypedSvg.Types.px 10), TypedSvg.Attributes.fill (TypedSvg.Types.Paint (Scale.Color.viridisInterpolator 1)) ] []
@@ -328,13 +328,11 @@ expandSeries idx series =
         |> Dict.toList
         |> List.filter (\( dateStr, _ ) -> not (isWeekend dateStr))
 
-
 holidayDict : Index -> Dict String (Maybe Float)
 holidayDict idx =
     Date.range Date.Day 1 (startDate idx) endDate
         |> List.map (\dateValue -> ( Date.toIsoString dateValue, Nothing ))
         |> Dict.fromList
-
 
 startDate : Index -> Date
 startDate idx =
