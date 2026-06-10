@@ -321,7 +321,7 @@ view model =
         numberFilterCars =
             String.fromInt (List.length filteredCars.data)
     in
-    div []
+    div [ style "background-color" "#222", style "color" "#fff", style "padding" "20px", style "min-height" "100vh", style "font-family" "sans-serif" ]
         [ p []
             [ text
                 ("Total Cars: "
