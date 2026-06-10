@@ -335,7 +335,16 @@ view model =
             (List.map
                 (\attr ->
                     button
-                        [ onClick (SelectX attr) ]
+                        [ onClick (SelectX attr)
+                        , style "padding" "10px 16px"
+                        , style "font-size" "14px"
+                        , style "font-weight" "bold"
+                        , style "cursor" "pointer"
+                        , style "border" "none"
+                        , style "border-radius" "4px"
+                        , style "background-color" (if isActive then "#39ff14" else "#444")
+                        , style "color" (if isActive then "#000" else "#fff")
+                        ]
                         [ text (attributeToString attr) ]
                 )
                 attributes
@@ -345,7 +354,16 @@ view model =
             (List.map
                 (\attr ->
                     button
-                        [ onClick (SelectY attr) ]
+                        [ onClick (SelectY attr) 
+                        , style "padding" "10px 16px"
+                        , style "font-size" "14px"
+                        , style "font-weight" "bold"
+                        , style "cursor" "pointer"
+                        , style "border" "none"
+                        , style "border-radius" "4px"
+                        , style "background-color" (if isActive then "#39ff14" else "#444")
+                        , style "color" (if isActive then "#000" else "#fff")
+                        ]
                         [ text (attributeToString attr) ]
                 )
                 attributes
