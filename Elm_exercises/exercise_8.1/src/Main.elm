@@ -1,7 +1,10 @@
 module Main exposing (main)
-import Browser
+
 import Axis
+import Browser
+import Color
 import Html exposing (Html, button, div, p, text)
+import Html.Attributes as HA
 import Html.Events exposing (onClick)
 import Scale exposing (ContinuousScale, point)
 import Statistics
@@ -9,7 +12,8 @@ import TypedSvg exposing (circle, g, rect, style, svg, text_)
 import TypedSvg.Attributes exposing (class, fontFamily, fontSize, textAnchor, transform, viewBox)
 import TypedSvg.Attributes.InPx exposing (cx, cy, height, r, width, x, y)
 import TypedSvg.Core exposing (Svg)
-import TypedSvg.Types exposing (AnchorAlignment(..), Length(..), Transform(..))
+import TypedSvg.Types exposing (AnchorAlignment(..), Length(..), Paint(..), Transform(..))
+
 
 w : Float
 w =
@@ -132,32 +136,50 @@ scatterplot model =
             , y = wideExtent yValues |> Tuple.second
             }
     in
-    svg [ viewBox 0 0 w h, TypedSvg.Attributes.width <| TypedSvg.Types.Percent 100, TypedSvg.Attributes.height <| TypedSvg.Types.Percent 100 ]
-        [ style [] [ TypedSvg.Core.text """
+    svg
+        [ viewBox 0 0 w h
+        , TypedSvg.Attributes.width <| TypedSvg.Types.Percent 100
+        , TypedSvg.Attributes.height <| TypedSvg.Types.Percent 100
+        ]
+        [ style []
+            [ TypedSvg.Core.text """
             .point circle { stroke: rgba(0, 0, 0,0.4); fill: rgba(255, 255, 255,0.3); }
             .point text { display: none; }
             .point:hover circle { stroke: rgba(0, 0, 0,1.0); fill: rgb(118, 214, 78); }
             .point:hover text { display: inline; }
-          """ ]
-        , g [ transform [ Translate padding (h - padding) ] ]
+            .axis path { stroke: white; }
+            .axis line { stroke: white; }
+            .axis text { fill: white; }
+            """
+            ]
+        , g
+            [ class [ "axis" ]
+            , transform [ Translate padding (h - padding) ]
+            ]
             [ xAxis xValues
             , text_
                 [ x (Scale.convert xScaleLocal labelPositions.x)
                 , y 40
                 , textAnchor AnchorMiddle
+                , TypedSvg.Attributes.fill (TypedSvg.Types.Paint Color.white)
                 ]
                 [ TypedSvg.Core.text model.xDescription ]
             ]
-        , g [ transform [ Translate padding padding ] ]
+        , g
+            [ class [ "axis" ]
+            , transform [ Translate padding padding ]
+            ]
             [ yAxis yValues
             , text_
                 [ x 0
                 , y (Scale.convert yScaleLocal labelPositions.y - 20)
                 , textAnchor AnchorMiddle
+                , TypedSvg.Attributes.fill (TypedSvg.Types.Paint Color.white)
                 ]
                 [ TypedSvg.Core.text model.yDescription ]
             ]
-        , g [ transform [ Translate padding padding ] ]
+        , g
+            [ transform [ Translate padding padding ] ]
             (List.map (point xScaleLocal yScaleLocal) model.data)
         ]
 
@@ -171,6 +193,7 @@ type alias XyData =
     , yDescription : String
     , data : List Point
     }
+
 
 type Attribute
     = CityMPG
@@ -271,6 +294,7 @@ attributes =
     , EngineSize
     ]
 
+
 filterAndReduceCars : Attribute -> Attribute -> List Car -> XyData
 filterAndReduceCars xAttr yAttr myCars =
     let
@@ -305,6 +329,47 @@ filterAndReduceCars xAttr yAttr myCars =
     }
 
 
+renderButtons : (Attribute -> Msg) -> Attribute -> Html Msg
+renderButtons msgConstructor currentAttr =
+    div
+        [ HA.style "margin-bottom" "20px"
+        , HA.style "display" "flex"
+        , HA.style "gap" "10px"
+        ]
+        (List.map (viewButton msgConstructor currentAttr) attributes)
+
+
+viewButton : (Attribute -> Msg) -> Attribute -> Attribute -> Html Msg
+viewButton msgConstructor currentAttr attr =
+    let
+        isActive =
+            attr == currentAttr
+    in
+    button
+        [ onClick (msgConstructor attr)
+        , HA.style "padding" "10px 16px"
+        , HA.style "font-size" "14px"
+        , HA.style "font-weight" "bold"
+        , HA.style "cursor" "pointer"
+        , HA.style "border" "none"
+        , HA.style "border-radius" "4px"
+        , HA.style "background-color"
+            (if isActive then
+                "#39ff14"
+
+             else
+                "#444"
+            )
+        , HA.style "color"
+            (if isActive then
+                "#000"
+
+             else
+                "#fff"
+            )
+        ]
+        [ text (attributeToString attr) ]
+
 
 view : Model -> Html Msg
 view model =
@@ -321,7 +386,13 @@ view model =
         numberFilterCars =
             String.fromInt (List.length filteredCars.data)
     in
-    div [ style "background-color" "#222", style "color" "#fff", style "padding" "20px", style "min-height" "100vh", style "font-family" "sans-serif" ]
+    div
+        [ HA.style "background-color" "#222"
+        , HA.style "color" "#fff"
+        , HA.style "padding" "20px"
+        , HA.style "min-height" "100vh"
+        , HA.style "font-family" "sans-serif"
+        ]
         [ p []
             [ text
                 ("Total Cars: "
@@ -331,43 +402,9 @@ view model =
                 )
             ]
         , p [] [ text "X-Achse" ]
-        , div []
-            (List.map
-                (\attr ->
-                    button
-                        [ onClick (SelectX attr)
-                        , style "padding" "10px 16px"
-                        , style "font-size" "14px"
-                        , style "font-weight" "bold"
-                        , style "cursor" "pointer"
-                        , style "border" "none"
-                        , style "border-radius" "4px"
-                        , style "background-color" (if isActive then "#39ff14" else "#444")
-                        , style "color" (if isActive then "#000" else "#fff")
-                        ]
-                        [ text (attributeToString attr) ]
-                )
-                attributes
-            )
+        , renderButtons SelectX model.xAttribute
         , p [] [ text "Y-Achse" ]
-        , div []
-            (List.map
-                (\attr ->
-                    button
-                        [ onClick (SelectY attr) 
-                        , style "padding" "10px 16px"
-                        , style "font-size" "14px"
-                        , style "font-weight" "bold"
-                        , style "cursor" "pointer"
-                        , style "border" "none"
-                        , style "border-radius" "4px"
-                        , style "background-color" (if isActive then "#39ff14" else "#444")
-                        , style "color" (if isActive then "#000" else "#fff")
-                        ]
-                        [ text (attributeToString attr) ]
-                )
-                attributes
-            )
+        , renderButtons SelectY model.yAttribute
         , scatterplot filteredCars
         ]
 
@@ -378,6 +415,7 @@ main =
         , update = update
         , view = view
         }
+
 
 type CarType
     = Small_Sporty_Compact_Large_Sedan
