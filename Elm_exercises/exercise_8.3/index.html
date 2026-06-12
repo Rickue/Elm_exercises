@@ -10708,11 +10708,32 @@ var $elm_community$typed_svg$TypedSvg$Attributes$height = function (length) {
 		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
 };
 var $author$project$Main$padding = 60;
-var $elm_community$typed_svg$TypedSvg$Types$PaintNone = {$: 'PaintNone'};
 var $elm_community$typed_svg$TypedSvg$Types$Px = function (a) {
 	return {$: 'Px', a: a};
 };
 var $elm_community$typed_svg$TypedSvg$Types$StrokeLinejoinRound = {$: 'StrokeLinejoinRound'};
+var $elm_community$typed_svg$TypedSvg$circle = $elm_community$typed_svg$TypedSvg$Core$node('circle');
+var $elm_community$typed_svg$TypedSvg$Attributes$cx = function (length) {
+	return A2(
+		$elm_community$typed_svg$TypedSvg$Core$attribute,
+		'cx',
+		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
+};
+var $elm_community$typed_svg$TypedSvg$Types$px = $elm_community$typed_svg$TypedSvg$Types$Px;
+var $elm_community$typed_svg$TypedSvg$Attributes$InPx$cx = function (value) {
+	return $elm_community$typed_svg$TypedSvg$Attributes$cx(
+		$elm_community$typed_svg$TypedSvg$Types$px(value));
+};
+var $elm_community$typed_svg$TypedSvg$Attributes$cy = function (length) {
+	return A2(
+		$elm_community$typed_svg$TypedSvg$Core$attribute,
+		'cy',
+		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
+};
+var $elm_community$typed_svg$TypedSvg$Attributes$InPx$cy = function (value) {
+	return $elm_community$typed_svg$TypedSvg$Attributes$cy(
+		$elm_community$typed_svg$TypedSvg$Types$px(value));
+};
 var $elm_community$typed_svg$TypedSvg$Attributes$d = $elm_community$typed_svg$TypedSvg$Core$attribute('d');
 var $elm$core$Basics$cos = _Basics_cos;
 var $elm$core$Basics$pi = _Basics_pi;
@@ -10720,84 +10741,93 @@ var $elm$core$Basics$clamp = F3(
 	function (low, high, number) {
 		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
 	});
-var $author$project$Main$scaleToAngle = F3(
-	function (_v0, _v1, value) {
+var $author$project$Main$scaleToRadius = F3(
+	function (_v0, maxRadius, value) {
 		var minVal = _v0.a;
 		var maxVal = _v0.b;
-		var minAngle = _v1.a;
-		var maxAngle = _v1.b;
 		var pct = A3($elm$core$Basics$clamp, 0.0, 1.0, (value - minVal) / (maxVal - minVal));
-		return minAngle + (pct * (maxAngle - minAngle));
+		return 2.0 + (pct * (maxRadius - 2.0));
 	});
 var $elm$core$Basics$sin = _Basics_sin;
-var $author$project$Main$drawCarChain = F2(
-	function (scaleFactor, car) {
-		var y0 = 0.0;
-		var x0 = 0.0;
-		var v5 = A2($elm$core$Maybe$withDefault, 0, car.carLen);
-		var v4 = A2($elm$core$Maybe$withDefault, 0, car.cityMPG);
-		var v3 = A2($elm$core$Maybe$withDefault, 0, car.weight);
-		var v2 = A2($elm$core$Maybe$withDefault, 0.0, car.engineSize);
-		var v1 = A2($elm$core$Maybe$withDefault, 0, car.retailPrice);
-		var len = 25.0 * scaleFactor;
-		var a1 = A3(
-			$author$project$Main$scaleToAngle,
-			_Utils_Tuple2(10000, 50000),
-			_Utils_Tuple2((-$elm$core$Basics$pi) / 12, $elm$core$Basics$pi / 4),
-			v1);
-		var a2 = a1 + A3(
-			$author$project$Main$scaleToAngle,
+var $author$project$Main$drawStarPlot = F2(
+	function (maxRadius, car) {
+		var r7 = A3(
+			$author$project$Main$scaleToRadius,
 			_Utils_Tuple2(1.0, 6.0),
-			_Utils_Tuple2((-$elm$core$Basics$pi) / 3, $elm$core$Basics$pi / 3),
-			v2);
-		var a3 = a2 + A3(
-			$author$project$Main$scaleToAngle,
+			maxRadius,
+			A2($elm$core$Maybe$withDefault, 0.0, car.engineSize));
+		var r6 = A3(
+			$author$project$Main$scaleToRadius,
+			_Utils_Tuple2(60, 85),
+			maxRadius,
+			A2($elm$core$Maybe$withDefault, 0, car.carWidth));
+		var r5 = A3(
+			$author$project$Main$scaleToRadius,
 			_Utils_Tuple2(1500, 5000),
-			_Utils_Tuple2((-$elm$core$Basics$pi) / 3, $elm$core$Basics$pi / 3),
-			v3);
-		var a4 = a3 + A3(
-			$author$project$Main$scaleToAngle,
-			_Utils_Tuple2(10, 40),
-			_Utils_Tuple2((-$elm$core$Basics$pi) / 3, $elm$core$Basics$pi / 3),
-			v4);
-		var a5 = a4 + A3(
-			$author$project$Main$scaleToAngle,
+			maxRadius,
+			A2($elm$core$Maybe$withDefault, 0, car.weight));
+		var r4 = A3(
+			$author$project$Main$scaleToRadius,
 			_Utils_Tuple2(140, 220),
-			_Utils_Tuple2((-$elm$core$Basics$pi) / 3, $elm$core$Basics$pi / 3),
-			v5);
-		var x1 = x0 + (len * $elm$core$Basics$cos(a1));
-		var x2 = x1 + (len * $elm$core$Basics$cos(a2));
-		var x3 = x2 + (len * $elm$core$Basics$cos(a3));
-		var x4 = x3 + (len * $elm$core$Basics$cos(a4));
-		var x5 = x4 + (len * $elm$core$Basics$cos(a5));
-		var y1 = y0 - (len * $elm$core$Basics$sin(a1));
-		var y2 = y1 - (len * $elm$core$Basics$sin(a2));
-		var y3 = y2 - (len * $elm$core$Basics$sin(a3));
-		var y4 = y3 - (len * $elm$core$Basics$sin(a4));
-		var y5 = y4 - (len * $elm$core$Basics$sin(a5));
+			maxRadius,
+			A2($elm$core$Maybe$withDefault, 0, car.carLen));
+		var r3 = A3(
+			$author$project$Main$scaleToRadius,
+			_Utils_Tuple2(10000, 50000),
+			maxRadius,
+			A2($elm$core$Maybe$withDefault, 0, car.dealerCost));
+		var r2 = A3(
+			$author$project$Main$scaleToRadius,
+			_Utils_Tuple2(10000, 50000),
+			maxRadius,
+			A2($elm$core$Maybe$withDefault, 0, car.retailPrice));
+		var r1 = A3(
+			$author$project$Main$scaleToRadius,
+			_Utils_Tuple2(10, 40),
+			maxRadius,
+			A2($elm$core$Maybe$withDefault, 0, car.cityMPG));
+		var angleStep = (2.0 * $elm$core$Basics$pi) / 7.0;
+		var p1x = r1 * $elm$core$Basics$cos(0 * angleStep);
+		var p1y = r1 * $elm$core$Basics$sin(0 * angleStep);
+		var p2x = r2 * $elm$core$Basics$cos(1 * angleStep);
+		var p2y = r2 * $elm$core$Basics$sin(1 * angleStep);
+		var p3x = r3 * $elm$core$Basics$cos(2 * angleStep);
+		var p3y = r3 * $elm$core$Basics$sin(2 * angleStep);
+		var p4x = r4 * $elm$core$Basics$cos(3 * angleStep);
+		var p4y = r4 * $elm$core$Basics$sin(3 * angleStep);
+		var p5x = r5 * $elm$core$Basics$cos(4 * angleStep);
+		var p5y = r5 * $elm$core$Basics$sin(4 * angleStep);
+		var p6x = r6 * $elm$core$Basics$cos(5 * angleStep);
+		var p6y = r6 * $elm$core$Basics$sin(5 * angleStep);
+		var p7x = r7 * $elm$core$Basics$cos(6 * angleStep);
+		var p7y = r7 * $elm$core$Basics$sin(6 * angleStep);
 		return A2(
 			$elm$core$String$join,
 			' ',
 			_List_fromArray(
 				[
 					'M',
-					$elm$core$String$fromFloat(x0),
-					$elm$core$String$fromFloat(y0),
+					$elm$core$String$fromFloat(p1x),
+					$elm$core$String$fromFloat(p1y),
 					'L',
-					$elm$core$String$fromFloat(x1),
-					$elm$core$String$fromFloat(y1),
+					$elm$core$String$fromFloat(p2x),
+					$elm$core$String$fromFloat(p2y),
 					'L',
-					$elm$core$String$fromFloat(x2),
-					$elm$core$String$fromFloat(y2),
+					$elm$core$String$fromFloat(p3x),
+					$elm$core$String$fromFloat(p3y),
 					'L',
-					$elm$core$String$fromFloat(x3),
-					$elm$core$String$fromFloat(y3),
+					$elm$core$String$fromFloat(p4x),
+					$elm$core$String$fromFloat(p4y),
 					'L',
-					$elm$core$String$fromFloat(x4),
-					$elm$core$String$fromFloat(y4),
+					$elm$core$String$fromFloat(p5x),
+					$elm$core$String$fromFloat(p5y),
 					'L',
-					$elm$core$String$fromFloat(x5),
-					$elm$core$String$fromFloat(y5)
+					$elm$core$String$fromFloat(p6x),
+					$elm$core$String$fromFloat(p6y),
+					'L',
+					$elm$core$String$fromFloat(p7x),
+					$elm$core$String$fromFloat(p7y),
+					'Z'
 				]));
 	});
 var $elm_community$typed_svg$TypedSvg$path = $elm_community$typed_svg$TypedSvg$Core$node('path');
@@ -10816,7 +10846,25 @@ var $author$project$Main$pseudoRandom = function (str) {
 			$elm$core$String$toList(str)));
 	return $elm$core$Basics$cos(codeSum * 12.345);
 };
+var $elm_community$typed_svg$TypedSvg$Attributes$r = function (length) {
+	return A2(
+		$elm_community$typed_svg$TypedSvg$Core$attribute,
+		'r',
+		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
+};
+var $elm_community$typed_svg$TypedSvg$Attributes$InPx$r = function (value) {
+	return $elm_community$typed_svg$TypedSvg$Attributes$r(
+		$elm_community$typed_svg$TypedSvg$Types$px(value));
+};
 var $elm$core$String$reverse = _String_reverse;
+var $avh4$elm_color$Color$RgbaSpace = F4(
+	function (a, b, c, d) {
+		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
+	});
+var $avh4$elm_color$Color$rgba = F4(
+	function (r, g, b, a) {
+		return A4($avh4$elm_color$Color$RgbaSpace, r, g, b, a);
+	});
 var $elm_community$typed_svg$TypedSvg$Attributes$stroke = A2(
 	$elm$core$Basics$composeL,
 	$elm_community$typed_svg$TypedSvg$Core$attribute('stroke'),
@@ -10941,12 +10989,7 @@ var $elm_community$typed_svg$TypedSvg$Attributes$transform = function (transform
 			' ',
 			A2($elm$core$List$map, $elm_community$typed_svg$TypedSvg$TypesToStrings$transformToString, transforms)));
 };
-var $avh4$elm_color$Color$RgbaSpace = F4(
-	function (a, b, c, d) {
-		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
-	});
 var $avh4$elm_color$Color$white = A4($avh4$elm_color$Color$RgbaSpace, 255 / 255, 255 / 255, 255 / 255, 1.0);
-var $elm_community$typed_svg$TypedSvg$Types$px = $elm_community$typed_svg$TypedSvg$Types$Px;
 var $elm_community$typed_svg$TypedSvg$Attributes$x = function (length) {
 	return A2(
 		$elm_community$typed_svg$TypedSvg$Core$attribute,
@@ -10974,7 +11017,7 @@ var $author$project$Main$point = F3(
 		var yPos = A2($gampleman$elm_visualization$Scale$convert, scaleY, xyPoint.y) + jitterY;
 		var jitterX = $author$project$Main$pseudoRandom(xyPoint.pointName) * 6.0;
 		var xPos = A2($gampleman$elm_visualization$Scale$convert, scaleX, xyPoint.x) + jitterX;
-		var chainSize = 0.35;
+		var iconSize = 15.0;
 		return A2(
 			$elm_community$typed_svg$TypedSvg$g,
 			_List_fromArray(
@@ -10995,13 +11038,26 @@ var $author$project$Main$point = F3(
 					_List_fromArray(
 						[
 							$elm_community$typed_svg$TypedSvg$Attributes$d(
-							A2($author$project$Main$drawCarChain, chainSize, xyPoint.originalCar)),
+							A2($author$project$Main$drawStarPlot, iconSize, xyPoint.originalCar)),
 							$elm_community$typed_svg$TypedSvg$Attributes$stroke(
 							$elm_community$typed_svg$TypedSvg$Types$Paint($avh4$elm_color$Color$white)),
 							$elm_community$typed_svg$TypedSvg$Attributes$strokeWidth(
-							$elm_community$typed_svg$TypedSvg$Types$Px(1.3)),
+							$elm_community$typed_svg$TypedSvg$Types$Px(1.2)),
 							$elm_community$typed_svg$TypedSvg$Attributes$strokeLinejoin($elm_community$typed_svg$TypedSvg$Types$StrokeLinejoinRound),
-							$elm_community$typed_svg$TypedSvg$Attributes$fill($elm_community$typed_svg$TypedSvg$Types$PaintNone)
+							$elm_community$typed_svg$TypedSvg$Attributes$fill(
+							$elm_community$typed_svg$TypedSvg$Types$Paint(
+								A4($avh4$elm_color$Color$rgba, 255, 255, 255, 0.05)))
+						]),
+					_List_Nil),
+					A2(
+					$elm_community$typed_svg$TypedSvg$circle,
+					_List_fromArray(
+						[
+							$elm_community$typed_svg$TypedSvg$Attributes$InPx$cx(0),
+							$elm_community$typed_svg$TypedSvg$Attributes$InPx$cy(0),
+							$elm_community$typed_svg$TypedSvg$Attributes$InPx$r(1.5),
+							$elm_community$typed_svg$TypedSvg$Attributes$fill(
+							$elm_community$typed_svg$TypedSvg$Types$Paint($avh4$elm_color$Color$white))
 						]),
 					_List_Nil),
 					A2(
@@ -11009,7 +11065,7 @@ var $author$project$Main$point = F3(
 					_List_fromArray(
 						[
 							$elm_community$typed_svg$TypedSvg$Attributes$InPx$x(0),
-							$elm_community$typed_svg$TypedSvg$Attributes$InPx$y(-12),
+							$elm_community$typed_svg$TypedSvg$Attributes$InPx$y(-18),
 							$elm_community$typed_svg$TypedSvg$Attributes$textAnchor($elm_community$typed_svg$TypedSvg$Types$AnchorMiddle)
 						]),
 					_List_fromArray(
@@ -11761,7 +11817,7 @@ var $author$project$Main$scatterplot = function (model) {
 				_List_Nil,
 				_List_fromArray(
 					[
-						$elm_community$typed_svg$TypedSvg$Core$text('\n            .point path { stroke: rgba(255, 255, 255, 0.35); transition: all 0.15s; }\n            .point text { display: none; fill: #39ff14; font-weight: bold; font-family: sans-serif; font-size: 11px; }\n            .point:hover path { stroke: #39ff14; stroke-width: 2.2px; opacity: 1; }\n            .point:hover text { display: inline; }\n            .axis path { stroke: white; }\n            .axis line { stroke: white; }\n            .axis text { fill: white; }\n            ')
+						$elm_community$typed_svg$TypedSvg$Core$text('\n            .point path { stroke: rgba(255, 255, 255, 0.35); transition: all 0.15s; }\n            .point circle { opacity: 0.4; transition: all 0.15s; }\n            .point text { display: none; fill: #39ff14; font-weight: bold; font-family: sans-serif; font-size: 11px; }\n            .point:hover path { stroke: #39ff14; fill: rgba(57, 255, 20, 0.2); stroke-width: 2.0px; }\n            .point:hover circle { fill: #39ff14; opacity: 1; }\n            .point:hover text { display: inline; }\n            .axis path { stroke: white; }\n            .axis line { stroke: white; }\n            .axis text { fill: white; }\n            ')
 					])),
 				A2(
 				$elm_community$typed_svg$TypedSvg$g,
@@ -11842,212 +11898,6 @@ var $author$project$Main$scatterplot = function (model) {
 					model.data))
 			]));
 };
-var $elm_community$typed_svg$TypedSvg$circle = $elm_community$typed_svg$TypedSvg$Core$node('circle');
-var $elm_community$typed_svg$TypedSvg$Attributes$cx = function (length) {
-	return A2(
-		$elm_community$typed_svg$TypedSvg$Core$attribute,
-		'cx',
-		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$InPx$cx = function (value) {
-	return $elm_community$typed_svg$TypedSvg$Attributes$cx(
-		$elm_community$typed_svg$TypedSvg$Types$px(value));
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$cy = function (length) {
-	return A2(
-		$elm_community$typed_svg$TypedSvg$Core$attribute,
-		'cy',
-		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$InPx$cy = function (value) {
-	return $elm_community$typed_svg$TypedSvg$Attributes$cy(
-		$elm_community$typed_svg$TypedSvg$Types$px(value));
-};
-var $elm$core$List$head = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return $elm$core$Maybe$Just(x);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$r = function (length) {
-	return A2(
-		$elm_community$typed_svg$TypedSvg$Core$attribute,
-		'r',
-		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$InPx$r = function (value) {
-	return $elm_community$typed_svg$TypedSvg$Attributes$r(
-		$elm_community$typed_svg$TypedSvg$Types$px(value));
-};
-var $avh4$elm_color$Color$red = A4($avh4$elm_color$Color$RgbaSpace, 204 / 255, 0 / 255, 0 / 255, 1.0);
-var $author$project$Main$viewExplanation = function (carList) {
-	var _v0 = $elm$core$List$head(carList);
-	if (_v0.$ === 'Nothing') {
-		return A2(
-			$elm$html$Html$div,
-			_List_Nil,
-			_List_fromArray(
-				[
-					$elm$html$Html$text('Keine Daten für die Erklärung vorhanden.')
-				]));
-	} else {
-		var firstCar = _v0.a;
-		return A2(
-			$elm$html$Html$div,
-			_List_fromArray(
-				[
-					A2($elm$html$Html$Attributes$style, 'display', 'flex'),
-					A2($elm$html$Html$Attributes$style, 'gap', '20px'),
-					A2($elm$html$Html$Attributes$style, 'background-color', '#333'),
-					A2($elm$html$Html$Attributes$style, 'padding', '12px 20px'),
-					A2($elm$html$Html$Attributes$style, 'border-radius', '6px'),
-					A2($elm$html$Html$Attributes$style, 'margin-bottom', '15px'),
-					A2($elm$html$Html$Attributes$style, 'align-items', 'center')
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							A2(
-							$elm$html$Html$p,
-							_List_fromArray(
-								[
-									A2($elm$html$Html$Attributes$style, 'font-weight', 'bold'),
-									A2($elm$html$Html$Attributes$style, 'margin', '0 0 5px 0'),
-									A2($elm$html$Html$Attributes$style, 'font-size', '13px')
-								]),
-							_List_fromArray(
-								[
-									$elm$html$Html$text('Erklärung (Signatur-Kette)')
-								])),
-							A2(
-							$elm_community$typed_svg$TypedSvg$svg,
-							_List_fromArray(
-								[
-									A4($elm_community$typed_svg$TypedSvg$Attributes$viewBox, -10, -100, 140, 75),
-									$elm_community$typed_svg$TypedSvg$Attributes$width(
-									$elm_community$typed_svg$TypedSvg$Types$Px(180)),
-									$elm_community$typed_svg$TypedSvg$Attributes$height(
-									$elm_community$typed_svg$TypedSvg$Types$Px(180)),
-									A2($elm$html$Html$Attributes$style, 'background-color', '#222'),
-									A2($elm$html$Html$Attributes$style, 'border-radius', '4px')
-								]),
-							_List_fromArray(
-								[
-									A2(
-									$elm_community$typed_svg$TypedSvg$g,
-									_List_Nil,
-									_List_fromArray(
-										[
-											A2(
-											$elm_community$typed_svg$TypedSvg$path,
-											_List_fromArray(
-												[
-													$elm_community$typed_svg$TypedSvg$Attributes$d(
-													A2($author$project$Main$drawCarChain, 1.3, firstCar)),
-													$elm_community$typed_svg$TypedSvg$Attributes$stroke(
-													$elm_community$typed_svg$TypedSvg$Types$Paint($avh4$elm_color$Color$white)),
-													$elm_community$typed_svg$TypedSvg$Attributes$strokeWidth(
-													$elm_community$typed_svg$TypedSvg$Types$Px(2.0)),
-													$elm_community$typed_svg$TypedSvg$Attributes$strokeLinejoin($elm_community$typed_svg$TypedSvg$Types$StrokeLinejoinRound),
-													$elm_community$typed_svg$TypedSvg$Attributes$fill($elm_community$typed_svg$TypedSvg$Types$PaintNone)
-												]),
-											_List_Nil),
-											A2(
-											$elm_community$typed_svg$TypedSvg$circle,
-											_List_fromArray(
-												[
-													$elm_community$typed_svg$TypedSvg$Attributes$InPx$cx(0),
-													$elm_community$typed_svg$TypedSvg$Attributes$InPx$cy(0),
-													$elm_community$typed_svg$TypedSvg$Attributes$InPx$r(3),
-													$elm_community$typed_svg$TypedSvg$Attributes$fill(
-													$elm_community$typed_svg$TypedSvg$Types$Paint($avh4$elm_color$Color$red))
-												]),
-											_List_Nil)
-										]))
-								]))
-						])),
-					A2(
-					$elm$html$Html$div,
-					_List_fromArray(
-						[
-							A2($elm$html$Html$Attributes$style, 'font-size', '12px'),
-							A2($elm$html$Html$Attributes$style, 'line-height', '1.4'),
-							A2($elm$html$Html$Attributes$style, 'display', 'flex'),
-							A2($elm$html$Html$Attributes$style, 'flex-direction', 'column'),
-							A2($elm$html$Html$Attributes$style, 'gap', '2px')
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$elm$html$Html$p,
-							_List_fromArray(
-								[
-									A2($elm$html$Html$Attributes$style, 'font-weight', 'bold'),
-									A2($elm$html$Html$Attributes$style, 'margin', '0 0 4px 0'),
-									A2($elm$html$Html$Attributes$style, 'color', '#39ff14')
-								]),
-							_List_fromArray(
-								[
-									$elm$html$Html$text('Modell: ' + (firstCar.vehicleName + ' (Start am roten Punkt)'))
-								])),
-							A2(
-							$elm$html$Html$div,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$elm$html$Html$text('• Glied 1 (Preis): Verläuft von flach bis steil nach rechts-oben.')
-								])),
-							A2(
-							$elm$html$Html$div,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$elm$html$Html$text('• Glied 2 (Hubraum): Ändert Richtung relativ zu Glied 1 (Mehr Hubraum = Biegt nach oben).')
-								])),
-							A2(
-							$elm$html$Html$div,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$elm$html$Html$text('• Glied 3 (Gewicht): Ändert Richtung relativ zu Glied 2 (Mehr Gewicht = Biegt nach oben).')
-								])),
-							A2(
-							$elm$html$Html$div,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$elm$html$Html$text('• Glied 4 (City MPG): Ändert Richtung relativ zu Glied 3 (Besserer Verbrauch = Biegt nach oben).')
-								])),
-							A2(
-							$elm$html$Html$div,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$elm$html$Html$text('• Glied 5 (Länge): Ändert Richtung relativ zu Glied 4 (Längeres Auto = Biegt nach oben).')
-								])),
-							A2(
-							$elm$html$Html$p,
-							_List_fromArray(
-								[
-									A2($elm$html$Html$Attributes$style, 'margin', '4px 0 0 0'),
-									A2($elm$html$Html$Attributes$style, 'color', '#aaa'),
-									A2($elm$html$Html$Attributes$style, 'font-style', 'italic')
-								]),
-							_List_fromArray(
-								[
-									$elm$html$Html$text('* Clustered Data hat ein stabiles, kleines Displacement (Jitter), damit Linien sich nicht verdecken.')
-								]))
-						]))
-				]));
-	}
-};
 var $author$project$Main$view = function (model) {
 	var numberCars = $elm$core$String$fromInt(
 		$elm$core$List$length($author$project$Main$cars));
@@ -12073,7 +11923,6 @@ var $author$project$Main$view = function (model) {
 					[
 						$elm$html$Html$text('Total Cars: ' + (numberCars + (' | Filtered Cars: ' + numberFilterCars)))
 					])),
-				$author$project$Main$viewExplanation($author$project$Main$cars),
 				A2(
 				$elm$html$Html$p,
 				_List_Nil,

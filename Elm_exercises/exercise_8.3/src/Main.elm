@@ -80,13 +80,14 @@ yAxis values =
     Axis.left [ Axis.tickCount tickCount ] (yScale values)
 
 
-scaleToAngle : ( Float, Float ) -> ( Float, Float ) -> Float -> Float
-scaleToAngle ( minVal, maxVal ) ( minAngle, maxAngle ) value =
+scaleToRadius : ( Float, Float ) -> Float -> Float -> Float
+scaleToRadius ( minVal, maxVal ) maxRadius value =
     let
         pct =
             (value - minVal) / (maxVal - minVal) |> clamp 0.0 1.0
     in
-    minAngle + (pct * (maxAngle - minAngle))
+    -- Mindestradius von 2.0 Pixeln
+    2.0 + (pct * (maxRadius - 2.0))
 
 
 pseudoRandom : String -> Float
@@ -98,119 +99,111 @@ pseudoRandom str =
                 |> List.sum
                 |> toFloat
     in
-    -- wert zw -1.0 und 1.0
     cos (codeSum * 12.345)
 
 
-
--- (±55 Grad)
-
-
-drawCarChain : Float -> Car -> String
-drawCarChain scaleFactor car =
+drawStarPlot : Float -> Car -> String
+drawStarPlot maxRadius car =
     let
-        len =
-            25.0 * scaleFactor
+        -- 7 Achsen -> Winkelabstand beträgt exakt 2*pi / 7
+        angleStep =
+            (2.0 * pi) / 7.0
 
-        -- Startpunkt im lokalen Ursprung
-        x0 =
-            0.0
+        -- Extrahiere und skaliere die Radien für alle 7 Dimensionen
+        r1 =
+            scaleToRadius ( 10, 40 ) maxRadius (car.cityMPG |> Maybe.withDefault 0 |> toFloat)
 
-        y0 =
-            0.0
+        r2 =
+            scaleToRadius ( 10000, 50000 ) maxRadius (car.retailPrice |> Maybe.withDefault 0 |> toFloat)
 
-        -- 1. Glied: Retail Price (Startet tendenziell flach nach rechts-oben)
-        v1 =
-            car.retailPrice |> Maybe.withDefault 0 |> toFloat
+        r3 =
+            scaleToRadius ( 10000, 50000 ) maxRadius (car.dealerCost |> Maybe.withDefault 0 |> toFloat)
 
-        a1 =
-            scaleToAngle ( 10000, 50000 ) ( -pi / 12, pi / 4 ) v1
+        r4 =
+            scaleToRadius ( 140, 220 ) maxRadius (car.carLen |> Maybe.withDefault 0 |> toFloat)
 
-        x1 =
-            x0 + len * cos a1
+        r5 =
+            scaleToRadius ( 1500, 5000 ) maxRadius (car.weight |> Maybe.withDefault 0 |> toFloat)
 
-        y1 =
-            y0 - len * sin a1
+        r6 =
+            scaleToRadius ( 60, 85 ) maxRadius (car.carWidth |> Maybe.withDefault 0 |> toFloat)
 
-        -- 2. Glied: Engine Size (Erlaubt deutliche Knicke relativ zur aktuellen Richtung)
-        v2 =
-            car.engineSize |> Maybe.withDefault 0.0
+        r7 =
+            scaleToRadius ( 1.0, 6.0 ) maxRadius (car.engineSize |> Maybe.withDefault 0.0)
 
-        a2 =
-            a1 + scaleToAngle ( 1.0, 6.0 ) ( -pi / 3, pi / 3 ) v2
+        -- Berechne die (X, Y) Koordinaten für jede Achsenspitze im lokalen Raum
+        p1x =
+            r1 * cos (0 * angleStep)
 
-        x2 =
-            x1 + len * cos a2
+        p1y =
+            r1 * sin (0 * angleStep)
 
-        y2 =
-            y1 - len * sin a2
+        p2x =
+            r2 * cos (1 * angleStep)
 
-        -- 3. Glied: Weight
-        v3 =
-            car.weight |> Maybe.withDefault 0 |> toFloat
+        p2y =
+            r2 * sin (1 * angleStep)
 
-        a3 =
-            a2 + scaleToAngle ( 1500, 5000 ) ( -pi / 3, pi / 3 ) v3
+        p3x =
+            r3 * cos (2 * angleStep)
 
-        x3 =
-            x2 + len * cos a3
+        p3y =
+            r3 * sin (2 * angleStep)
 
-        y3 =
-            y2 - len * sin a3
+        p4x =
+            r4 * cos (3 * angleStep)
 
-        -- 4. Glied: City MPG
-        v4 =
-            car.cityMPG |> Maybe.withDefault 0 |> toFloat
+        p4y =
+            r4 * sin (3 * angleStep)
 
-        a4 =
-            a3 + scaleToAngle ( 10, 40 ) ( -pi / 3, pi / 3 ) v4
+        p5x =
+            r5 * cos (4 * angleStep)
 
-        x4 =
-            x3 + len * cos a4
+        p5y =
+            r5 * sin (4 * angleStep)
 
-        y4 =
-            y3 - len * sin a4
+        p6x =
+            r6 * cos (5 * angleStep)
 
-        -- 5. Glied: Car Length
-        v5 =
-            car.carLen |> Maybe.withDefault 0 |> toFloat
+        p6y =
+            r6 * sin (5 * angleStep)
 
-        a5 =
-            a4 + scaleToAngle ( 140, 220 ) ( -pi / 3, pi / 3 ) v5
+        p7x =
+            r7 * cos (6 * angleStep)
 
-        x5 =
-            x4 + len * cos a5
-
-        y5 =
-            y4 - len * sin a5
+        p7y =
+            r7 * sin (6 * angleStep)
     in
+    -- Verbindet alle Punkte und schließt das Polygon am Ende mit "Z" ab
     String.join " "
         [ "M"
-        , String.fromFloat x0
-        , String.fromFloat y0
+        , String.fromFloat p1x
+        , String.fromFloat p1y
         , "L"
-        , String.fromFloat x1
-        , String.fromFloat y1
+        , String.fromFloat p2x
+        , String.fromFloat p2y
         , "L"
-        , String.fromFloat x2
-        , String.fromFloat y2
+        , String.fromFloat p3x
+        , String.fromFloat p3y
         , "L"
-        , String.fromFloat x3
-        , String.fromFloat y3
+        , String.fromFloat p4x
+        , String.fromFloat p4y
         , "L"
-        , String.fromFloat x4
-        , String.fromFloat y4
+        , String.fromFloat p5x
+        , String.fromFloat p5y
         , "L"
-        , String.fromFloat x5
-        , String.fromFloat y5
+        , String.fromFloat p6x
+        , String.fromFloat p6y
+        , "L"
+        , String.fromFloat p7x
+        , String.fromFloat p7y
+        , "Z"
         ]
 
 
 point : ContinuousScale Float -> ContinuousScale Float -> Point -> Svg msg
 point scaleX scaleY xyPoint =
     let
-        -- Berechne ein stabiles Displacement basierend auf dem Autonamen
-        -- (Maximal ±6 Pixel Versatz)
         jitterX =
             pseudoRandom xyPoint.pointName * 6.0
 
@@ -223,20 +216,30 @@ point scaleX scaleY xyPoint =
         yPos =
             Scale.convert scaleY xyPoint.y + jitterY
 
-        chainSize =
-            0.35
+        -- Maximaler Radius des Star Plots in Pixeln.
+        iconSize =
+            15.0
     in
     g [ transform [ Translate xPos yPos ], class [ "point" ] ]
-        [ TypedSvg.path
-            [ TypedSvg.Attributes.d (drawCarChain chainSize xyPoint.originalCar)
+        [ --polygonzug
+          TypedSvg.path
+            [ TypedSvg.Attributes.d (drawStarPlot iconSize xyPoint.originalCar)
             , TypedSvg.Attributes.stroke (Paint Color.white)
-            , TypedSvg.Attributes.strokeWidth (Px 1.3)
+            , TypedSvg.Attributes.strokeWidth (Px 1.2)
             , TypedSvg.Attributes.strokeLinejoin TypedSvg.Types.StrokeLinejoinRound
-            , TypedSvg.Attributes.fill TypedSvg.Types.PaintNone
+            , TypedSvg.Attributes.fill (Paint (Color.rgba 255 255 255 0.05))
+            ]
+            []
+        , -- mittelpunkt starplot
+          TypedSvg.circle
+            [ cx 0
+            , cy 0
+            , r 1.5
+            , TypedSvg.Attributes.fill (Paint Color.white)
             ]
             []
         , text_
-            [ x 0, y -12, textAnchor AnchorMiddle ]
+            [ x 0, y -18, textAnchor AnchorMiddle ]
             [ TypedSvg.Core.text xyPoint.pointName ]
         ]
 
@@ -278,8 +281,10 @@ scatterplot model =
         [ style []
             [ TypedSvg.Core.text """
             .point path { stroke: rgba(255, 255, 255, 0.35); transition: all 0.15s; }
+            .point circle { opacity: 0.4; transition: all 0.15s; }
             .point text { display: none; fill: #39ff14; font-weight: bold; font-family: sans-serif; font-size: 11px; }
-            .point:hover path { stroke: #39ff14; stroke-width: 2.2px; opacity: 1; }
+            .point:hover path { stroke: #39ff14; fill: rgba(57, 255, 20, 0.2); stroke-width: 2.0px; }
+            .point:hover circle { fill: #39ff14; opacity: 1; }
             .point:hover text { display: inline; }
             .axis path { stroke: white; }
             .axis line { stroke: white; }
@@ -433,59 +438,6 @@ attributes =
     ]
 
 
-viewExplanation : List Car -> Html msg
-viewExplanation carList =
-    case List.head carList of
-        Nothing ->
-            div [] [ text "Keine Daten für die Erklärung vorhanden." ]
-
-        Just firstCar ->
-            div
-                [ HA.style "display" "flex"
-                , HA.style "gap" "20px"
-                , HA.style "background-color" "#333"
-                , HA.style "padding" "12px 20px"
-                , HA.style "border-radius" "6px"
-                , HA.style "margin-bottom" "15px"
-                , HA.style "align-items" "center"
-                ]
-                [ div []
-                    [ p [ HA.style "font-weight" "bold", HA.style "margin" "0 0 5px 0", HA.style "font-size" "13px" ]
-                        [ text "Erklärung (Signatur-Kette)" ]
-                    , svg
-                        [ viewBox -10 -100 140 75
-                        , TypedSvg.Attributes.width (Px 180)
-                        , TypedSvg.Attributes.height (Px 180)
-                        , HA.style "background-color" "#222"
-                        , HA.style "border-radius" "4px"
-                        ]
-                        [ g []
-                            [ TypedSvg.path
-                                [ TypedSvg.Attributes.d (drawCarChain 1.3 firstCar)
-                                , TypedSvg.Attributes.stroke (Paint Color.white)
-                                , TypedSvg.Attributes.strokeWidth (Px 2.0)
-                                , TypedSvg.Attributes.strokeLinejoin TypedSvg.Types.StrokeLinejoinRound
-                                , TypedSvg.Attributes.fill TypedSvg.Types.PaintNone
-                                ]
-                                []
-                            , TypedSvg.circle [ cx 0, cy 0, r 3, TypedSvg.Attributes.fill (Paint Color.red) ] []
-                            ]
-                        ]
-                    ]
-                , div [ HA.style "font-size" "12px", HA.style "line-height" "1.4", HA.style "display" "flex", HA.style "flex-direction" "column", HA.style "gap" "2px" ]
-                    [ p [ HA.style "font-weight" "bold", HA.style "margin" "0 0 4px 0", HA.style "color" "#39ff14" ]
-                        [ text ("Modell: " ++ firstCar.vehicleName ++ " (Start am roten Punkt)") ]
-                    , div [] [ text "• Glied 1 (Preis): Verläuft von flach bis steil nach rechts-oben." ]
-                    , div [] [ text "• Glied 2 (Hubraum): Ändert Richtung relativ zu Glied 1 (Mehr Hubraum = Biegt nach oben)." ]
-                    , div [] [ text "• Glied 3 (Gewicht): Ändert Richtung relativ zu Glied 2 (Mehr Gewicht = Biegt nach oben)." ]
-                    , div [] [ text "• Glied 4 (City MPG): Ändert Richtung relativ zu Glied 3 (Besserer Verbrauch = Biegt nach oben)." ]
-                    , div [] [ text "• Glied 5 (Länge): Ändert Richtung relativ zu Glied 4 (Längeres Auto = Biegt nach oben)." ]
-                    , p [ HA.style "margin" "4px 0 0 0", HA.style "color" "#aaa", HA.style "font-style" "italic" ]
-                        [ text "* Clustered Data hat ein stabiles, kleines Displacement (Jitter), damit Linien sich nicht verdecken." ]
-                    ]
-                ]
-
-
 filterAndReduceCars : Attribute -> Attribute -> List Car -> XyData
 filterAndReduceCars xAttr yAttr myCars =
     let
@@ -593,7 +545,6 @@ view model =
                     ++ numberFilterCars
                 )
             ]
-        , viewExplanation cars
         , p [] [ text "X-Achse" ]
         , renderButtons SelectX model.xAttribute
         , p [] [ text "Y-Achse" ]
