@@ -6,7 +6,7 @@ import Color
 import Html exposing (Html, button, div, p, text)
 import Html.Attributes as HA
 import Html.Events exposing (onClick)
-import Scale exposing (ContinuousScale, point)
+import Scale exposing (ContinuousScale)
 import Statistics
 import TypedSvg exposing (circle, g, rect, style, svg, text_)
 import TypedSvg.Attributes exposing (class, fontFamily, fontSize, textAnchor, transform, viewBox)
@@ -143,8 +143,8 @@ scatterplot model =
         ]
         [ style []
             [ TypedSvg.Core.text """
-            .point circle { stroke: rgba(0, 0, 0,0.4); fill: rgba(255, 255, 255,0.3); }
-            .point text { display: none; }
+            .point circle { stroke: rgba(255, 255, 255, 0.7); fill: rgba(255, 255, 255,0.3); }
+            .point text { display: none; fill: white;}
             .point:hover circle { stroke: rgba(0, 0, 0,1.0); fill: rgb(118, 214, 78); }
             .point:hover text { display: inline; }
             .axis path { stroke: white; }

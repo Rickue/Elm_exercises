@@ -1,15 +1,19 @@
 module Main exposing (main)
-import Browser
+
 import Axis
+import Browser
+import Color
 import Html exposing (Html, button, div, p, text)
+import Html.Attributes as HA
 import Html.Events exposing (onClick)
-import Scale exposing (ContinuousScale, point)
+import Scale exposing (ContinuousScale)
 import Statistics
 import TypedSvg exposing (circle, g, rect, style, svg, text_)
 import TypedSvg.Attributes exposing (class, fontFamily, fontSize, textAnchor, transform, viewBox)
 import TypedSvg.Attributes.InPx exposing (cx, cy, height, r, width, x, y)
 import TypedSvg.Core exposing (Svg)
-import TypedSvg.Types exposing (AnchorAlignment(..), Length(..), Transform(..))
+import TypedSvg.Types exposing (AnchorAlignment(..), Length(..), Paint(..), Transform(..))
+
 
 w : Float
 w =
@@ -76,20 +80,166 @@ yAxis values =
     Axis.left [ Axis.tickCount tickCount ] (yScale values)
 
 
+scaleToRadius : ( Float, Float ) -> Float -> Float -> Float
+scaleToRadius ( minVal, maxVal ) maxRadius value =
+    let
+        pct =
+            (value - minVal) / (maxVal - minVal) |> clamp 0.0 1.0
+    in
+    -- Mindestradius von 2.0 Pixeln
+    2.0 + (pct * (maxRadius - 2.0))
+
+
+pseudoRandom : String -> Float
+pseudoRandom str =
+    let
+        codeSum =
+            String.toList str
+                |> List.map Char.toCode
+                |> List.sum
+                |> toFloat
+    in
+    cos (codeSum * 12.345)
+
+
+drawStarPlot : Float -> Car -> String
+drawStarPlot maxRadius car =
+    let
+        -- 7 Achsen -> Winkelabstand beträgt exakt 2*pi / 7
+        angleStep =
+            (2.0 * pi) / 7.0
+
+        -- Extrahiere und skaliere die Radien für alle 7 Dimensionen
+        r1 =
+            scaleToRadius ( 10, 40 ) maxRadius (car.cityMPG |> Maybe.withDefault 0 |> toFloat)
+
+        r2 =
+            scaleToRadius ( 10000, 50000 ) maxRadius (car.retailPrice |> Maybe.withDefault 0 |> toFloat)
+
+        r3 =
+            scaleToRadius ( 10000, 50000 ) maxRadius (car.dealerCost |> Maybe.withDefault 0 |> toFloat)
+
+        r4 =
+            scaleToRadius ( 140, 220 ) maxRadius (car.carLen |> Maybe.withDefault 0 |> toFloat)
+
+        r5 =
+            scaleToRadius ( 1500, 5000 ) maxRadius (car.weight |> Maybe.withDefault 0 |> toFloat)
+
+        r6 =
+            scaleToRadius ( 60, 85 ) maxRadius (car.carWidth |> Maybe.withDefault 0 |> toFloat)
+
+        r7 =
+            scaleToRadius ( 1.0, 6.0 ) maxRadius (car.engineSize |> Maybe.withDefault 0.0)
+
+        -- Berechne die (X, Y) Koordinaten für jede Achsenspitze im lokalen Raum
+        p1x =
+            r1 * cos (0 * angleStep)
+
+        p1y =
+            r1 * sin (0 * angleStep)
+
+        p2x =
+            r2 * cos (1 * angleStep)
+
+        p2y =
+            r2 * sin (1 * angleStep)
+
+        p3x =
+            r3 * cos (2 * angleStep)
+
+        p3y =
+            r3 * sin (2 * angleStep)
+
+        p4x =
+            r4 * cos (3 * angleStep)
+
+        p4y =
+            r4 * sin (3 * angleStep)
+
+        p5x =
+            r5 * cos (4 * angleStep)
+
+        p5y =
+            r5 * sin (4 * angleStep)
+
+        p6x =
+            r6 * cos (5 * angleStep)
+
+        p6y =
+            r6 * sin (5 * angleStep)
+
+        p7x =
+            r7 * cos (6 * angleStep)
+
+        p7y =
+            r7 * sin (6 * angleStep)
+    in
+    -- Verbindet alle Punkte und schließt das Polygon am Ende mit "Z" ab
+    String.join " "
+        [ "M"
+        , String.fromFloat p1x
+        , String.fromFloat p1y
+        , "L"
+        , String.fromFloat p2x
+        , String.fromFloat p2y
+        , "L"
+        , String.fromFloat p3x
+        , String.fromFloat p3y
+        , "L"
+        , String.fromFloat p4x
+        , String.fromFloat p4y
+        , "L"
+        , String.fromFloat p5x
+        , String.fromFloat p5y
+        , "L"
+        , String.fromFloat p6x
+        , String.fromFloat p6y
+        , "L"
+        , String.fromFloat p7x
+        , String.fromFloat p7y
+        , "Z"
+        ]
+
+
 point : ContinuousScale Float -> ContinuousScale Float -> Point -> Svg msg
 point scaleX scaleY xyPoint =
-    g [ class [ "point" ], fontSize <| Px 10.0, fontFamily [ "sans-serif" ] ]
-        [ circle
-            [ cx <| Scale.convert scaleX xyPoint.x
-            , cy <| Scale.convert scaleY xyPoint.y
-            , r radius
+    let
+        jitterX =
+            pseudoRandom xyPoint.pointName * 6.0
+
+        jitterY =
+            pseudoRandom (String.reverse xyPoint.pointName) * 6.0
+
+        xPos =
+            Scale.convert scaleX xyPoint.x + jitterX
+
+        yPos =
+            Scale.convert scaleY xyPoint.y + jitterY
+
+        -- Maximaler Radius des Star Plots in Pixeln.
+        iconSize =
+            15.0
+    in
+    g [ transform [ Translate xPos yPos ], class [ "point" ] ]
+        [ --polygonzug
+          TypedSvg.path
+            [ TypedSvg.Attributes.d (drawStarPlot iconSize xyPoint.originalCar)
+            , TypedSvg.Attributes.stroke (Paint Color.white)
+            , TypedSvg.Attributes.strokeWidth (Px 1.2)
+            , TypedSvg.Attributes.strokeLinejoin TypedSvg.Types.StrokeLinejoinRound
+            , TypedSvg.Attributes.fill (Paint (Color.rgba 255 255 255 0.05))
+            ]
+            []
+        , -- mittelpunkt starplot
+          TypedSvg.circle
+            [ cx 0
+            , cy 0
+            , r 1.5
+            , TypedSvg.Attributes.fill (Paint Color.white)
             ]
             []
         , text_
-            [ x <| Scale.convert scaleX xyPoint.x
-            , y <| Scale.convert scaleY xyPoint.y - radius - 5
-            , textAnchor AnchorMiddle
-            ]
+            [ x 0, y -18, textAnchor AnchorMiddle ]
             [ TypedSvg.Core.text xyPoint.pointName ]
         ]
 
@@ -97,15 +247,6 @@ point scaleX scaleY xyPoint =
 scatterplot : XyData -> Svg msg
 scatterplot model =
     let
-        kreisbeschriftung : String
-        kreisbeschriftung =
-            case List.head model.data of
-                Just p ->
-                    p.pointName
-
-                Nothing ->
-                    ""
-
         xValues : List Float
         xValues =
             List.map .x model.data
@@ -132,38 +273,62 @@ scatterplot model =
             , y = wideExtent yValues |> Tuple.second
             }
     in
-    svg [ viewBox 0 0 w h, TypedSvg.Attributes.width <| TypedSvg.Types.Percent 100, TypedSvg.Attributes.height <| TypedSvg.Types.Percent 100 ]
-        [ style [] [ TypedSvg.Core.text """
-            .point circle { stroke: rgba(0, 0, 0,0.4); fill: rgba(255, 255, 255,0.3); }
-            .point text { display: none; }
-            .point:hover circle { stroke: rgba(0, 0, 0,1.0); fill: rgb(118, 214, 78); }
+    svg
+        [ viewBox 0 0 w h
+        , TypedSvg.Attributes.width <| TypedSvg.Types.Percent 100
+        , TypedSvg.Attributes.height <| TypedSvg.Types.Percent 100
+        ]
+        [ style []
+            [ TypedSvg.Core.text """
+            .point path { stroke: rgba(255, 255, 255, 0.35); transition: all 0.15s; }
+            .point circle { opacity: 0.4; transition: all 0.15s; }
+            .point text { display: none; fill: #39ff14; font-weight: bold; font-family: sans-serif; font-size: 11px; }
+            .point:hover path { stroke: #39ff14; fill: rgba(57, 255, 20, 0.2); stroke-width: 2.0px; }
+            .point:hover circle { fill: #39ff14; opacity: 1; }
             .point:hover text { display: inline; }
-          """ ]
-        , g [ transform [ Translate padding (h - padding) ] ]
+            .axis path { stroke: white; }
+            .axis line { stroke: white; }
+            .axis text { fill: white; }
+            """
+            ]
+        , g
+            [ class [ "axis" ]
+            , transform [ Translate padding (h - padding) ]
+            ]
             [ xAxis xValues
             , text_
                 [ x (Scale.convert xScaleLocal labelPositions.x)
                 , y 40
                 , textAnchor AnchorMiddle
+                , TypedSvg.Attributes.fill (TypedSvg.Types.Paint Color.white)
                 ]
                 [ TypedSvg.Core.text model.xDescription ]
             ]
-        , g [ transform [ Translate padding padding ] ]
+        , g
+            [ class [ "axis" ]
+            , transform [ Translate padding padding ]
+            ]
             [ yAxis yValues
             , text_
                 [ x 0
-                , y (Scale.convert yScaleLocal labelPositions.y - 20)
+                , y -20
                 , textAnchor AnchorMiddle
+                , TypedSvg.Attributes.fill (TypedSvg.Types.Paint Color.white)
                 ]
                 [ TypedSvg.Core.text model.yDescription ]
             ]
-        , g [ transform [ Translate padding padding ] ]
+        , g
+            [ transform [ Translate padding padding ] ]
             (List.map (point xScaleLocal yScaleLocal) model.data)
         ]
 
 
 type alias Point =
-    { pointName : String, x : Float, y : Float }
+    { pointName : String
+    , x : Float
+    , y : Float
+    , originalCar : Car
+    }
 
 
 type alias XyData =
@@ -171,6 +336,7 @@ type alias XyData =
     , yDescription : String
     , data : List Point
     }
+
 
 type Attribute
     = CityMPG
@@ -271,6 +437,7 @@ attributes =
     , EngineSize
     ]
 
+
 filterAndReduceCars : Attribute -> Attribute -> List Car -> XyData
 filterAndReduceCars xAttr yAttr myCars =
     let
@@ -295,6 +462,7 @@ filterAndReduceCars xAttr yAttr myCars =
                     { pointName = car.vehicleName
                     , x = attributeValue xAttr car
                     , y = attributeValue yAttr car
+                    , originalCar = car
                     }
                 )
                 completeCars
@@ -304,6 +472,47 @@ filterAndReduceCars xAttr yAttr myCars =
     , data = ergebnis
     }
 
+
+renderButtons : (Attribute -> Msg) -> Attribute -> Html Msg
+renderButtons msgConstructor currentAttr =
+    div
+        [ HA.style "margin-bottom" "20px"
+        , HA.style "display" "flex"
+        , HA.style "gap" "10px"
+        ]
+        (List.map (viewButton msgConstructor currentAttr) attributes)
+
+
+viewButton : (Attribute -> Msg) -> Attribute -> Attribute -> Html Msg
+viewButton msgConstructor currentAttr attr =
+    let
+        isActive =
+            attr == currentAttr
+    in
+    button
+        [ onClick (msgConstructor attr)
+        , HA.style "padding" "10px 16px"
+        , HA.style "font-size" "14px"
+        , HA.style "font-weight" "bold"
+        , HA.style "cursor" "pointer"
+        , HA.style "border" "none"
+        , HA.style "border-radius" "4px"
+        , HA.style "background-color"
+            (if isActive then
+                "#39ff14"
+
+             else
+                "#444"
+            )
+        , HA.style "color"
+            (if isActive then
+                "#000"
+
+             else
+                "#fff"
+            )
+        ]
+        [ text (attributeToString attr) ]
 
 
 view : Model -> Html Msg
@@ -321,7 +530,13 @@ view model =
         numberFilterCars =
             String.fromInt (List.length filteredCars.data)
     in
-    div []
+    div
+        [ HA.style "background-color" "#222"
+        , HA.style "color" "#fff"
+        , HA.style "padding" "20px"
+        , HA.style "min-height" "100vh"
+        , HA.style "font-family" "sans-serif"
+        ]
         [ p []
             [ text
                 ("Total Cars: "
@@ -331,25 +546,9 @@ view model =
                 )
             ]
         , p [] [ text "X-Achse" ]
-        , div []
-            (List.map
-                (\attr ->
-                    button
-                        [ onClick (SelectX attr) ]
-                        [ text (attributeToString attr) ]
-                )
-                attributes
-            )
+        , renderButtons SelectX model.xAttribute
         , p [] [ text "Y-Achse" ]
-        , div []
-            (List.map
-                (\attr ->
-                    button
-                        [ onClick (SelectY attr) ]
-                        [ text (attributeToString attr) ]
-                )
-                attributes
-            )
+        , renderButtons SelectY model.yAttribute
         , scatterplot filteredCars
         ]
 
@@ -360,6 +559,7 @@ main =
         , update = update
         , view = view
         }
+
 
 type CarType
     = Small_Sporty_Compact_Large_Sedan
