@@ -54,7 +54,7 @@ init () =
       , errorMsg = "Loading Flare JSON..."
       }
     , Http.get
-        { url = "../data_csv/flare.json"
+        { url = "/Elm_exercises/data_csv/flare.json"
         , expect = Http.expectJson GotFlare treeDecoder
         }
     )
