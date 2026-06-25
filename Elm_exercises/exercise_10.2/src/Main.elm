@@ -54,7 +54,7 @@ init () =
       , errorMsg = "Loading Flare JSON..."
       }
     , Http.get
-        { url = "https://cors-anywhere.herokuapp.com/https://users.informatik.uni-halle.de/~hinnebur/Lehre/InfoVis/U07/flare.json"
+        { url = "../../data_csv/flare.json"
         , expect = Http.expectJson GotFlare treeDecoder
         }
     )

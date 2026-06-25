@@ -2,10 +2,10 @@ module Main exposing (main)
 
 import Browser
 import Color
-import Hierarchy 
+import Hierarchy
 import Html exposing (Html, button, div, text)
-import Html.Events exposing (onClick)
 import Html.Attributes
+import Html.Events exposing (onClick)
 import Http
 import Json.Decode
 import Tree exposing (Tree)
@@ -15,7 +15,10 @@ import TypedSvg.Attributes.InPx exposing (cx, cy, height, r, width, x, x1, x2, y
 import TypedSvg.Core exposing (Svg)
 import TypedSvg.Types exposing (AnchorAlignment(..), Length(..), Paint(..), Transform(..))
 
+
+
 -- hierarchy Walker-Layoutberechnung
+
 
 type alias Model =
     { tree : Tree String, errorMsg : String }
@@ -24,7 +27,7 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init () =
     ( { tree = Tree.singleton "", errorMsg = "Loading ..." }
-    , Http.get { url = "https://cors-anywhere.herokuapp.com/https://users.informatik.uni-halle.de/~hinnebur/Lehre/InfoVis/U07/flare.json", expect = Http.expectJson GotFlare treeDecoder }
+    , Http.get { url = "../../data_csv/flare.json", expect = Http.expectJson GotFlare treeDecoder }
     )
 
 
@@ -72,6 +75,7 @@ update msg model =
             , Cmd.none
             )
 
+
 type alias LayoutData =
     { x : Float, y : Float, name : String }
 
@@ -107,7 +111,7 @@ computeLayout treeToLayout =
 view : Model -> Html Msg
 view model =
     div [ Html.Attributes.style "font-family" "sans-serif", Html.Attributes.style "padding" "20px" ]
-        [ div [ Html.Attributes.style "margin-bottom" "10px", Html.Attributes.style "font-weight" "bold" ] 
+        [ div [ Html.Attributes.style "margin-bottom" "10px", Html.Attributes.style "font-weight" "bold" ]
             [ Html.text ("Status: " ++ model.errorMsg) ]
         , if model.errorMsg == "No Error" then
             let
@@ -147,10 +151,11 @@ view model =
                             []
                         , text_
                             [ transform [ Rotate 90 node.x node.y ] --rotation 90
+
                             -- ausrichtung des rotierten texts
                             , x (node.x + 8)
                             , y (node.y + 3)
-                            , textAnchor AnchorStart 
+                            , textAnchor AnchorStart
                             , fontSize (Px 9)
                             , fontFamily [ "sans-serif" ]
                             ]
@@ -182,6 +187,7 @@ main =
         , update = update
         , subscriptions = \m -> Sub.none
         }
+
 
 labelToHtml : String -> Html msg
 labelToHtml l =
