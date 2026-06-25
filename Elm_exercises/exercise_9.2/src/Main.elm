@@ -27,7 +27,7 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init () =
     ( { tree = Tree.singleton "", errorMsg = "Loading ..." }
-    , Http.get { url = "../data_csv/flare.json", expect = Http.expectJson GotFlare treeDecoder }
+    , Http.get { url = "/Elm_exercises/data_csv/flare.json", expect = Http.expectJson GotFlare treeDecoder }
     )
 
 
